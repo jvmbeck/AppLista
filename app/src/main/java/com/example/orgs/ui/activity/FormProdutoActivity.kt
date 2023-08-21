@@ -1,0 +1,88 @@
+package com.example.orgs.ui.activity
+
+import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import com.example.orgs.dao.ProdutosDAO
+import com.example.orgs.databinding.ActivityFormProdutoBinding
+import com.example.orgs.databinding.FormularioAlertDialogBinding
+import com.example.orgs.extensions.carregarImagem
+import com.example.orgs.model.Produto
+import java.math.BigDecimal
+
+class FormProdutoActivity : AppCompatActivity() {
+
+    private val binding by lazy {
+        ActivityFormProdutoBinding.inflate(layoutInflater)
+    }
+
+    private var url: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+        title = "Cadastro de Produto"
+        configBotao()
+
+        binding.EditTextNome.setText(Produto.nome)
+        binding.EditTextDesc.setText(Produto.descricao)
+        binding.EditTextValor.text.toString()
+
+        binding.activityFormProdutoImagem.setOnClickListener {
+            val bindingFormularioImagem = FormularioAlertDialogBinding.inflate(layoutInflater)
+            val imagem = bindingFormularioImagem.imagemAlert
+
+            bindingFormularioImagem.formularioImagemTextInputEditText.setText(url)
+            imagem.carregarImagem(url)
+
+            bindingFormularioImagem.btnCarregar.setOnClickListener {
+
+                url = bindingFormularioImagem.formularioImagemTextInputEditText.text.toString()
+                imagem.carregarImagem(url)
+            }
+            AlertDialog.Builder(this)
+                .setView(bindingFormularioImagem.root)
+                .setPositiveButton("Confirmar") { _, _ ->
+
+                    binding.activityFormProdutoImagem.carregarImagem(url)
+                }
+                .setNegativeButton("Cancelar") { _, _ ->
+
+                }
+                .show()
+        }
+    }
+
+    fun configBotao() {
+        val botao = binding.ButtonSalvar
+        val dao = ProdutosDAO()
+
+        botao.setOnClickListener {
+            val campoNome = binding.EditTextNome
+            val nome = campoNome.text.toString()
+            val campoDesc = binding.EditTextDesc
+            val desc = campoDesc.text.toString()
+            val campoValor = binding.EditTextValor
+            val valorEmTexto = campoValor.text.toString()
+
+            val valorNum = if (valorEmTexto.isBlank()) {
+                BigDecimal.ZERO
+            } else {
+                BigDecimal(valorEmTexto)
+            }
+
+            val novoProduto = Produto(
+                nome = nome,
+                descricao = desc,
+                valor = valorNum,
+                imagem = url
+            )
+
+            dao.add(novoProduto)
+
+            finish()
+        }
+    }
+
+}
+
