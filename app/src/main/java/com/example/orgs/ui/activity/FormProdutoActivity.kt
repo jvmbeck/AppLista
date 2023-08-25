@@ -3,7 +3,7 @@ package com.example.orgs.ui.activity
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.orgs.dao.ProdutosDAO
+import com.example.orgs.database.AppDatabase
 import com.example.orgs.databinding.ActivityFormProdutoBinding
 import com.example.orgs.databinding.FormularioAlertDialogBinding
 import com.example.orgs.extensions.carregarImagem
@@ -23,10 +23,6 @@ class FormProdutoActivity : AppCompatActivity() {
         setContentView(binding.root)
         title = "Cadastro de Produto"
         configBotao()
-
-        binding.EditTextNome.setText(Produto.nome)
-        binding.EditTextDesc.setText(Produto.descricao)
-        binding.EditTextValor.text.toString()
 
         binding.activityFormProdutoImagem.setOnClickListener {
             val bindingFormularioImagem = FormularioAlertDialogBinding.inflate(layoutInflater)
@@ -55,33 +51,41 @@ class FormProdutoActivity : AppCompatActivity() {
 
     fun configBotao() {
         val botao = binding.ButtonSalvar
-        val dao = ProdutosDAO()
+        val db = AppDatabase.instancia(this)
+
+        val produtoDao = db.produtoDao()
 
         botao.setOnClickListener {
-            val campoNome = binding.EditTextNome
-            val nome = campoNome.text.toString()
-            val campoDesc = binding.EditTextDesc
-            val desc = campoDesc.text.toString()
-            val campoValor = binding.EditTextValor
-            val valorEmTexto = campoValor.text.toString()
+            val novoProduto = criaProduto()
 
-            val valorNum = if (valorEmTexto.isBlank()) {
-                BigDecimal.ZERO
-            } else {
-                BigDecimal(valorEmTexto)
-            }
-
-            val novoProduto = Produto(
-                nome = nome,
-                descricao = desc,
-                valor = valorNum,
-                imagem = url
-            )
-
-            dao.add(novoProduto)
+            produtoDao.salva(novoProduto)
 
             finish()
         }
+    }
+
+    private fun criaProduto(): Produto {
+        val campoNome = binding.EditTextNome
+        val nome = campoNome.text.toString()
+        val campoDesc = binding.EditTextDesc
+        val desc = campoDesc.text.toString()
+        val campoValor = binding.EditTextValor
+        val valorEmTexto = campoValor.text.toString()
+
+        val valorNum = if (valorEmTexto.isBlank()) {
+            BigDecimal.ZERO
+        } else {
+            BigDecimal(valorEmTexto)
+        }
+
+        val novoProduto = Produto(
+            nome = nome,
+            descricao = desc,
+            valor = valorNum,
+            imagem = url
+        )
+
+        return novoProduto
     }
 
 }

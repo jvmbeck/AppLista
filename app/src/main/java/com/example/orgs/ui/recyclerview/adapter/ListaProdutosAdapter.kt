@@ -8,13 +8,10 @@ import com.example.orgs.databinding.ProdutoItemBinding
 import com.example.orgs.extensions.carregarImagem
 import com.example.orgs.extensions.formataPraMoedaBrasileira
 import com.example.orgs.model.Produto
-import java.math.BigDecimal
-import java.text.NumberFormat
-import java.util.Locale
 
 class ListaProdutosAdapter(
     private val context: Context,
-    produtos: List<Produto>,
+    produtos: List<Produto> = emptyList(),
     var clickNoItemListener: (produto:Produto) -> Unit = {}
 ) : RecyclerView.Adapter<ListaProdutosAdapter.ViewHolder>() {
 

@@ -1,34 +1,23 @@
 package com.example.orgs.ui.activity
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.orgs.R
-import com.example.orgs.dao.ProdutosDAO
+import com.example.orgs.database.AppDatabase
 import com.example.orgs.databinding.ActivityListaProdutoBinding
-import com.example.orgs.databinding.ProdutoItemBinding
-import com.example.orgs.model.Produto
 import com.example.orgs.ui.recyclerview.adapter.ListaProdutosAdapter
 
-class ListaProdutosActivity : AppCompatActivity(){
+class ListaProdutosActivity : AppCompatActivity() {
 
+    private val adapter = ListaProdutosAdapter(this)
     private val binding by lazy {
         ActivityListaProdutoBinding.inflate(layoutInflater)
 
     }
 
-    private val dao = ProdutosDAO()
-    private val adapter = ListaProdutosAdapter(
-        this,
-        produtos = dao.buscaTodos()
-    )
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
         configRecyclerView()
         configFAB()
 
@@ -37,7 +26,10 @@ class ListaProdutosActivity : AppCompatActivity(){
     override fun onResume() {
         super.onResume()
 
-        adapter.atualiza(dao.buscaTodos())
+        val db = AppDatabase.instancia(this)
+        val produtoDao = db.produtoDao()
+        adapter.atualiza(produtoDao.buscaTodos())
+
         configFAB()
     }
 
