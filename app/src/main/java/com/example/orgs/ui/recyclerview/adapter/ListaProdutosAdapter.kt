@@ -2,8 +2,13 @@ package com.example.orgs.ui.recyclerview.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
+import com.example.orgs.R
 import com.example.orgs.databinding.ProdutoItemBinding
 import com.example.orgs.extensions.carregarImagem
 import com.example.orgs.extensions.formataPraMoedaBrasileira
@@ -12,9 +17,10 @@ import com.example.orgs.model.Produto
 class ListaProdutosAdapter(
     private val context: Context,
     produtos: List<Produto> = emptyList(),
-    var clickNoItemListener: (produto:Produto) -> Unit = {}
+    var clickNoItemListener: (produto:Produto) -> Unit = {},
+    var quandoClicaEmEditar: (produto: Produto) -> Unit = {},
+    var quandoClicaEmRemover: (produto: Produto) -> Unit = {}
 ) : RecyclerView.Adapter<ListaProdutosAdapter.ViewHolder>() {
-
 
     private val produtos = produtos.toMutableList()
 
@@ -33,7 +39,7 @@ class ListaProdutosAdapter(
     }
 
     inner class ViewHolder(private val binding: ProdutoItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+        RecyclerView.ViewHolder(binding.root), PopupMenu.OnMenuItemClickListener {
 
         private lateinit var produto: Produto
 
@@ -43,7 +49,19 @@ class ListaProdutosAdapter(
                     clickNoItemListener(produto)
                 }
             }
+            itemView.setOnLongClickListener {
+                PopupMenu(context, itemView).apply {
+                    menuInflater.inflate(
+                        R.menu.menu_detalhes_produto,
+                        menu
+                    )
+                    setOnMenuItemClickListener(this@ViewHolder)
+                }.show()
+                true
+            }
+
         }
+
 
         private val title = binding.titulo
         private val description = binding.descricao
@@ -64,6 +82,19 @@ class ListaProdutosAdapter(
 
         }
 
+        override fun onMenuItemClick(item: MenuItem?): Boolean {
+            item?.let {
+                when (it.itemId) {
+                    R.id.button_editar -> {
+                        quandoClicaEmEditar(produto)
+                    }
+                    R.id.button_deletar -> {
+                        quandoClicaEmRemover(produto)
+                    }
+                }
+            }
+            return true
+        }
     }
 
     override fun getItemCount(): Int = produtos.size
